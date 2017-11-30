@@ -5,6 +5,7 @@ import java.net.URL
 import org.scalatest.{FunSuite, Matchers}
 import MyFunctions.combineFunctions
 
+import scala.collection.immutable
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
@@ -147,8 +148,7 @@ class FunctionsSpec extends FunSuite with Matchers {
         .groupBy(identity)
         .mapValues(_.length)
         .toList
-        .sortBy(_.swap)
-        .reverse
+        .sortBy(t => -t._2 -> t._1)
 
 
     println(stringses)
@@ -165,21 +165,21 @@ class FunctionsSpec extends FunSuite with Matchers {
 
 
   test("Lists with flatMap") {
-    val xs = List(1,2,3,4)
-    val ys = List(5,6,7,8)
+    val xs = List(1, 2, 3, 4)
+    val ys = List(5, 6, 7, 8)
 
     val result: List[(Int, Int)] =
-      xs.flatMap(x => ys.map(y => (x,y)))
+      xs.flatMap(x => ys.map(y => (x, y)))
 
     println(result)
 
     val result2 = for (x <- xs;
-                       y <- ys) yield (x,y)
+                       y <- ys) yield (x, y)
 
     println(result2)
 
     val result3 = for (x <- xs;
-                       y <- Nil) yield (x,y)
+                       y <- Nil) yield (x, y)
 
     println(result3)
   }
@@ -208,26 +208,348 @@ class FunctionsSpec extends FunSuite with Matchers {
 
     println(tupleB)
 
-    val tupleC = timeThis{40; 40 + 10}
+    val tupleC = timeThis {
+      40;
+      40 + 10
+    }
     println(tupleC)
   }
 
 
   test("Monadic Try") {
-    val triedInt = Try {5 * 100}
+    val triedInt = Try {
+      5 * 100
+    }
 
-    val triedInt2 = Try {5 / 0}
+    val triedInt2 = Try {
+      5 / 0
+    }
 
     val result = for (i <- triedInt;
-                      j <- triedInt2 ) yield i + j
+                      j <- triedInt2) yield i + j
 
     val str = result match {
-      case Success(x:Int) => s"Yay! $x"
-      case Failure(t:Throwable) => s"Oops ${t.getMessage}"
+      case Success(x: Int) => s"Yay! $x"
+      case Failure(t: Throwable) => s"Oops ${t.getMessage}"
       case _ => "I don't know what..."
     }
 
     println(str)
+  }
+
+  test("Grocery List") {
+    val list = List("Eggs", "Milk", "Naan", "Broccoli",
+      "Salmon", "Apples", "Green Lettuce", "Peas")
+    val result = list
+      .sorted
+      .zip(1 to list.length)
+      .map(t => s"${t._2}. ${t._1}")
+      .mkString("\n")
+    // println(result)
+
+    val value = for {x <- list
+                     str <- s"$x"} yield str
+    println(value)
+
+    //Dennis'
+    val dennis = list.sorted.map { x => list.sorted.indexOf(x) + 1 -> x }
+      .map(x => s"${x._1}. ${x._2}").mkString("\n")
+
+    println(dennis)
+
+    val resultFor =
+      for (x <- list.sorted.zip(1 to list.length))
+        yield
+          s"${x._2}. ${x._1}"
+    println(resultFor.mkString(","))
+
+
+  }
+
+  val stateCaps =
+    """Albany
+      |Annapolis
+      |Atlanta
+      |Augusta
+      |Austin
+      |Baton Rouge
+      |Bismarck
+      |Boise
+      |Boston
+      |Carson City
+      |Charleston
+      |Cheyenne
+      |Columbia
+      |Columbus
+      |Concord
+      |Denver
+      |Des Moines
+      |Dover
+      |Frankfort
+      |Harrisburg
+      |Hartford
+      |Helena
+      |Honolulu
+      |Indianapolis
+      |Jackson
+      |Jefferson City
+      |Juneau
+      |Lansing
+      |Lincoln
+      |Little Rock
+      |Madison
+      |Montgomery
+      |Montpelier
+      |Nashville
+      |Oklahoma City
+      |Olympia
+      |Phoenix
+      |Pierre
+      |Providence
+      |Raleigh
+      |Richmond
+      |Sacramento
+      |Saint Paul
+      |Salem
+      |Salt Lake City
+      |Santa Fe
+      |Springfield
+      |Tallahassee
+      |Topeka
+      |Trenton
+    """.stripMargin
+
+
+  val countryCaps =
+    """Afghanistan,Kabul
+      |Albania,Tirana
+      |Andorra,Andorra la Vella
+      |Angola,Luanda
+      |Antigua and Barbuda,St. John’s
+      |Argentina,Buenos Aires
+      |Armenia,Yerevan
+      |Australia,Canberra
+      |Austria,Vienna
+      |Azerbaijan,Baku
+      |Bahamas,Nassau
+      |Bahrain,Manama
+      |Bangladesh,Dhaka
+      |Barbados,Bridgetown
+      |Belarus,Minsk
+      |Belgium,Brussels
+      |Belize,Belmopan
+      |Benin,Porto Novo, Cotonou
+      |Bhutan,Thimphu
+      |Bolivia,La Paz and Sucre
+      |Bosnia and Herzegovina,Sarajevo
+      |Botswana,Gaborone
+      |Brazil,Brasília
+      |Brunei,Bandar Seri Begawan
+      |Bulgaria,Sofia
+      |Burkina Faso,Ouagadougou
+      |Burundi,Bujumbura
+      |Cambodia,Phnom Penh
+      |Cameroon,Yaoundé
+      |Canada,Ottawa
+      |Cape Verde,Praia
+      |Cayman Islands,George Town
+      |Central African Republic,Bangui
+      |Chad,N’Djamena
+      |Chile,Santiago
+      |China,Beijing
+      |Colombia,Bogotá
+      |Comoros,Moroni
+      |Costa Rica,San José
+      |Côte d’Ivoire,Yamoussoukro
+      |Croatia,Zagreb
+      |Cuba,Havana
+      |Cyprus,Nicosia
+      |Czech Republic,Prague
+      |Democratic Republic of the Congo,Kinshasa
+      |Denmark,Copenhagen
+      |Djibouti,Djibouti
+      |Dominica,Roseau
+      |Dominican Republic,Santo Domingo
+      |East Timor,Dili
+      |Ecuador,Quito
+      |Egypt,Cairo
+      |El Salvador,San Salvador
+      |Equatorial Guinea,Malabo
+      |Eritrea,Asmara
+      |Estonia,Tallinn
+      |Ethiopia,Addis Ababa
+      |Fiji,Suva
+      |Finland,Helsinki
+      |France,Paris
+      |French Guiana,Cayenne
+      |Gabon,Libreville
+      |Georgia,Tbilisi
+      |Germany,Berlin
+      |Ghana,Accra
+      |Greece,Athens
+      |Grenada,St George’s
+      |Guatemala,Guatemala
+      |Guinea,Conakry
+      |Guinea-Bissau,
+      |Guyana,Georgetown
+      |Haiti,Port-au-Prince
+      |Honduras,Tegucigalpa
+      |Hungary,Budapest
+      |Iceland,Reykjavik
+      |India,New Delhi
+      |Indonesia,Jakarta
+      |Iran,Tehran
+      |Iraq,Baghdad
+      |Israel,Jerusalem
+      |Italy,Rome
+      |Jamaica,Kingston, Jamaica
+      |Japan,Tokyo
+      |Jordan,Amman
+      |Kazakhstan,Astana
+      |Kenya,Nairobi
+      |Kiribati,South Tarawa
+      |Kuwait,Kuwait
+      |Kyrgyzstan,Bishkek
+      |Laos,Vientiane
+      |Latvia,Riga
+      |Lebanon,Beirut
+      |Lesotho,Maseru
+      |Liberia,Monrovia
+      |Libya,Tripoli
+      |Liechtenstein,Vaduz
+      |Lithuania,Vilnius
+      |Luxembourg,Luxembourg City
+      |Madagascar,Antananarivo
+      |Malawi,Lilongwe
+      |Malaysia,Kuala Lumpur
+      |Maldives,Malé
+      |Mali,Bamako
+      |Malta,Valletta
+      |Marshall Islands,Majuro
+      |Mauritania,Nouakchott
+      |Mauritius,Port Louis
+      |Mexico,Mexico City
+      |Micronesia,Palikir
+      |Moldova,Chisinau
+      |Monaco,Monaco
+      |Mongolia,Ulaanbaatar
+      |Montenegro,Podgorica
+      |Morocco,Rabat
+      |Mozambique,Maputo
+      |Myanmar,Naypyidaw
+      |Namibia,Windhoek
+      |Nauru,Yaren
+      |Nepal,Kathmandu
+      |Netherlands ,Amsterdam
+      |New Zealand,Wellington
+      |Nicaragua,Managua
+      |Niger,Niamey
+      |Nigeria,Abuja
+      |North Korea,Pyongyang
+      |Norway,Oslo
+      |Oman,Muscat
+      |Pakistan,Islamabad
+      |Palau,Koror
+      |Palestine,Jerusalem
+      |Panama,Panama City
+      |Papua New Guinea,Port Moresby
+      |Paraguay,Asuncion
+      |Peru,Lima
+      |Philippines,Manila
+      |Poland,Warsaw
+      |Portugal,Lisbon
+      |Puerto Rico,San Juan
+      |Qatar,Doha
+      |Republic of Ireland,Dublin
+      |Republic of Macedonia,Skopje
+      |Republic of the Congo,Brazzaville
+      |Romania,Bucharest
+      |Russia,Moscow
+      |Russia,Moscow
+      |Rwanda,Kigali
+      |Saint Kitts and Nevis,Basseterre
+      |Saint Lucia,Castries
+      |Saint Vincent and the Grenadines,Kingstown
+      |Samoa,Apia
+      |San Marino,San Marino
+      |São Tomé and Príncipe,São Tomé
+      |Saudi Arabia,Riyadh
+      |Senegal,Dakar
+      |Serbia,Belgrade
+      |Seychelles,Victoria, Seychelles
+      |Sierra Leone,Freetown
+      |Singapore,Singapore
+      |Slovakia,Bratislava
+      |Slovenia,Ljubljana
+      |Solomon Islands,Honiara
+      |Somalia,Mogadishu
+      |South Africa,Pretoria
+      |South Korea,Seoul
+      |South Sudan,Juba
+      |Spain,Madrid
+      |Sri Lanka,Sri Jayawardenapura Kotte and Colombo now
+      |Sudan,Khartoum
+      |Suriname,Paramaribo
+      |Swaziland,Mbabane
+      |Sweden,Stockholm
+      |Switzerland,Bern
+      |Syria,Damascus
+      |Taiwan,Taipei
+      |Taiwan,Taipei
+      |Tajikistan,Dushanbe
+      |Tanzania,Dar es Salaam, Dodoma
+      |Thailand,Bangkok
+      |The Gambia,Banjul
+      |Togo,Lome
+      |Tonga,Nuku’alofa
+      |Trinidad and Tobago,Port of Spain
+      |Tunisia,Tunis
+      |Turkey,Ankara
+      |Turkey,Ankara
+      |Turkmenistan,Asgabat
+      |Turks and Caicos,Cockburn Town
+      |Tuvalu,Funafuti
+      |Uganda,Kampala
+      |Ukraine,Kyiv or Kiev
+      |United Arab Emirates,Abu Dhabi
+      |United Kingdom,London
+      |United States,Washington DC
+      |Uruguay,Montevideo
+      |Uzbekistan,Tashkent
+      |Vanuatu,Port Vila
+      |Vatican City,Vatican City
+      |Venezuela,Caracas
+      |Vietnam,Hanoi
+      |Western Sahara,La’youn
+      |Yemen,Sana’a
+      |Zambia,Lusaka
+      |Zimbabwe,Harare""".stripMargin
+
+  test("State caps") {
+    val cleanCountries = countryCaps
+      .split("\n")
+      .map(w => w.split(",").last)
+      .map(cp => cp.replace(" ", ""))
+
+    println(cleanCountries.toList)
+  }
+
+
+  test("For Comprehension Stream") {
+    lazy val fibs: Stream[BigInt] = BigInt(0) #:: BigInt(1) #::
+      fibs.zip(fibs.tail).map { n => n._1 + n._2 }
+
+    def loop(x:Int):Stream[Int] = x #:: loop(x+1)
+
+    val result1 = for
+        {f <- fibs
+         i <- loop(0)} yield (i, f)
+
+    println(result1.take(10).mkString(","))
+
+    val result2 = fibs.flatMap(i => loop(0).map(j => (j, i)))
+
+    println(result2 take 10 mkString ",")
   }
 }
 
