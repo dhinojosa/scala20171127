@@ -136,7 +136,6 @@ class FunctionsSpec extends FunSuite with Matchers {
 
     val uglyChars = List('}', '{', ',', ';', '(', ')', '[', ']', '!')
 
-    Ordering[]
     val stringses =
       text
         .split("\n")
@@ -229,13 +228,7 @@ class FunctionsSpec extends FunSuite with Matchers {
     }
 
     println(str)
-
-
-
   }
-
-
-
 }
 
 
