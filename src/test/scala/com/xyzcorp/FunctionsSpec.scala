@@ -191,6 +191,13 @@ class FunctionsSpec extends FunSuite with Matchers {
     (result, System.currentTimeMillis() - startTime)
   }
 
+
+  //  def timeThis[A](bl: => A): (A, Long) = {
+  //    val startTime = System.currentTimeMillis()
+  //    val result = bl
+  //    (result, System.currentTimeMillis() - startTime)
+  //  }
+
   test("by-name parameter") {
     val tuple: (Int, Long) = timeThis {
       Thread.sleep(3000)
@@ -199,20 +206,20 @@ class FunctionsSpec extends FunSuite with Matchers {
     println(tuple)
 
 
-    val tupleB = timeThis {
-      val a = "Foo"
-      val b = "Bar"
-      Thread.sleep(3000)
-      a + b
-    }
-
-    println(tupleB)
-
-    val tupleC = timeThis {
-      40;
-      40 + 10
-    }
-    println(tupleC)
+    //    val tupleB = timeThis {
+    //      val a = "Foo"
+    //      val b = "Bar"
+    //      Thread.sleep(3000)
+    //      a + b
+    //    }
+    //
+    //    println(tupleB)
+    //
+    //    val tupleC = timeThis {
+    //      40;
+    //      40 + 10
+    //    }
+    //    println(tupleC)
   }
 
 
@@ -243,25 +250,25 @@ class FunctionsSpec extends FunSuite with Matchers {
     val result = list
       .sorted
       .zip(1 to list.length)
-      .map(t => s"${t._2}. ${t._1}")
+      .map{case (food, idx) => s"$idx. $food"}
       .mkString("\n")
-    // println(result)
-
-    val value = for {x <- list
-                     str <- s"$x"} yield str
-    println(value)
-
-    //Dennis'
-    val dennis = list.sorted.map { x => list.sorted.indexOf(x) + 1 -> x }
-      .map(x => s"${x._1}. ${x._2}").mkString("\n")
-
-    println(dennis)
-
-    val resultFor =
-      for (x <- list.sorted.zip(1 to list.length))
-        yield
-          s"${x._2}. ${x._1}"
-    println(resultFor.mkString(","))
+    println(result)
+    //
+    //    val value = for {x <- list
+    //                     str <- s"$x"} yield str
+    //    println(value)
+    //
+    //    //Dennis'
+    //    val dennis = list.sorted.map { x => list.sorted.indexOf(x) + 1 -> x }
+    //      .map(x => s"${x._1}. ${x._2}").mkString("\n")
+    //
+    //    println(dennis)
+    //
+    //    val resultFor =
+    //      for (x <- list.sorted.zip(1 to list.length))
+    //        yield
+    //          s"${x._2}. ${x._1}"
+    //    println(resultFor.mkString(","))
 
 
   }
@@ -539,11 +546,10 @@ class FunctionsSpec extends FunSuite with Matchers {
     lazy val fibs: Stream[BigInt] = BigInt(0) #:: BigInt(1) #::
       fibs.zip(fibs.tail).map { n => n._1 + n._2 }
 
-    def loop(x:Int):Stream[Int] = x #:: loop(x+1)
+    def loop(x: Int): Stream[Int] = x #:: loop(x + 1)
 
-    val result1 = for
-        {f <- fibs
-         i <- loop(0)} yield (i, f)
+    val result1 = for {f <- fibs
+                       i <- loop(0)} yield (i, f)
 
     println(result1.take(10).mkString(","))
 
